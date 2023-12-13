@@ -1,6 +1,6 @@
 export interface IUserData {
-    userList: IUser[];
-    totalCount: number;
+    items: IUser[];
+    total_count: number;
 }
 
 export interface IUser {

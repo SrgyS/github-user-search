@@ -2,8 +2,8 @@ import { IUserData } from '../../types';
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState: IUserData = {
-    userList: [],
-    totalCount: 0,
+    items: [],
+    total_count: 0,
 };
 
 const usersSlice = createSlice({

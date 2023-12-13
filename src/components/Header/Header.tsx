@@ -2,26 +2,25 @@ import * as S from './Header.styles';
 
 import { IFormData, IUserData } from '../../types';
 import { Outlet, useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 
+import Loader from '../Loader/Loader';
 import Search from '../Search/Search';
 import darkThemeBtn from '../../assets/icons/dark_mode.png';
-import { lightTheme } from '../Styles/Themes.styles';
 import lightThemeBtn from '../../assets/icons/light_mode.png';
-import { useGetUserListQuery } from '../../store/services/usersApi';
+import { useGetUserListMutation } from '../../store/services/usersApi';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '../../hooks/useTheme';
 
 type HeaderProps = {
-    setUserData: (data: IUserData) => void;
+    setUserData: (data: IUserData | undefined) => void;
     currentPage: number;
     setCurrentPage: (page: number) => void;
 };
 
 const Header = ({ setUserData, currentPage, setCurrentPage }: HeaderProps) => {
-    const { toggleTheme, theme } = useTheme();
+    const { toggleTheme, lightMode } = useTheme();
     const [errorMessage, setErrorMessage] = useState('');
-    const isLightTheme = theme === lightTheme;
 
     const [queryParams, setQueryParams] = useLocalStorage<IFormData | null>(
         'searchParams',
@@ -30,38 +29,48 @@ const Header = ({ setUserData, currentPage, setCurrentPage }: HeaderProps) => {
 
     const navigate = useNavigate();
 
-    const { data, isLoading, error } = useGetUserListQuery({
-        userName: queryParams?.userLogin,
-        page: currentPage,
-        sort: queryParams?.sort,
-        order: queryParams?.order,
-    });
+    const [getUserList, { data, isLoading, error }] = useGetUserListMutation();
 
-    const handleSubmit = (data: IFormData) => {
-        setQueryParams(data);
+    const handleSubmit = (formData: IFormData) => {
+        setCurrentPage(1);
+        setQueryParams(formData);
         setErrorMessage('');
     };
 
     const onClear = () => {
         localStorage.removeItem('searchParams');
-        setUserData({ userList: [], totalCount: 0 });
+        setUserData(undefined);
         navigate('/');
     };
 
     useEffect(() => {
         if (error) {
-            setErrorMessage(
-                'Sorry, we are unable to get the response from the server. Please try again later.'
-            );
+            if ('status' in error) {
+                error.status === 403
+                    ? setErrorMessage(
+                          'Sorry, over request limit. Please try again later.'
+                      )
+                    : setErrorMessage(
+                          'Sorry, we are unable to get the response from the server. Please try again later.'
+                      );
+            }
         }
         if (data) {
             console.log('data', data);
-            setUserData({
-                totalCount: data.total_count,
-                userList: data.items,
-            });
+            setUserData(data);
         }
     }, [data, isLoading, error]);
+
+    useEffect(() => {
+        if (queryParams.userLogin !== '') {
+            getUserList({
+                userLogin: queryParams.userLogin,
+                currentPage: currentPage,
+                sort: queryParams?.sort,
+                order: queryParams?.order,
+            });
+        }
+    }, [queryParams, getUserList, currentPage]);
 
     useEffect(() => {
         setCurrentPage(1);
@@ -74,7 +83,7 @@ const Header = ({ setUserData, currentPage, setCurrentPage }: HeaderProps) => {
                     <h1>GitHub Users Search</h1>
                     <S.ThemeBtn onClick={toggleTheme}>
                         <img
-                            src={isLightTheme ? darkThemeBtn : lightThemeBtn}
+                            src={lightMode ? darkThemeBtn : lightThemeBtn}
                             alt=''
                         />
                     </S.ThemeBtn>
@@ -85,7 +94,9 @@ const Header = ({ setUserData, currentPage, setCurrentPage }: HeaderProps) => {
                 <S.NotFoundMessage>No users found</S.NotFoundMessage>
             )}
             {errorMessage && <S.ErrorMessage>{errorMessage}</S.ErrorMessage>}
-            <Outlet />
+            <Suspense fallback={<Loader />}>
+                <Outlet />
+            </Suspense>
         </S.HeaderContainer>
     );
 };

@@ -1,39 +1,26 @@
+import 'react-lazy-load-image-component/src/effects/blur.css';
+
 import * as S from './UserList.styles';
 
 import { IUser } from '../../types';
-import { useState } from 'react';
+import { LazyLoadImage } from 'react-lazy-load-image-component';
 
 type Props = {
     users: IUser[];
 };
 
 function UserList({ users }: Props) {
-    const [selectedUser, setSelectedUser] = useState<IUser | undefined>(
-        undefined
-    );
-
     return (
         users.length > 0 && (
             <S.UserListContainer>
                 <S.UserList>
                     {users &&
                         users.map((user) => (
-                            <S.ListItem
-                                key={user.id}
-                                onClick={() => {
-                                    setSelectedUser(user);
-                                }}
-                            >
-                                <S.StyledLink
-                                    to={`user/${user.login}`}
-                                    className={
-                                        selectedUser?.id === user.id
-                                            ? 'selected'
-                                            : ''
-                                    }
-                                >
+                            <S.ListItem key={user.id}>
+                                <S.StyledLink to={`user/${user.login}`}>
                                     <S.UserAvatar>
-                                        <img
+                                        <LazyLoadImage
+                                            effect='blur'
                                             src={user.avatar_url}
                                             alt='user avatar'
                                         />

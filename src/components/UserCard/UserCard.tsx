@@ -2,7 +2,6 @@ import * as S from './UserCard.styles';
 
 import SkeletonCard from '../SkeletonCard/SkeletonCard';
 import UserInfo from './UserInfo/UserInfo';
-import UserLinks from './UserLinks/UserLinks';
 import UserStats from './UserStats/UserStats';
 import { useEffect } from 'react';
 import { useGetUserQuery } from '../../store/services/usersApi';
@@ -28,17 +27,13 @@ const UserCard = () => {
                         login={user.login}
                         avatar={user.avatar_url}
                         username={user.name}
+                        location={user.location}
                         joined={user.created_at}
                     />
                     <UserStats
                         repos={user.public_repos}
                         followers={user.followers}
                         following={user.following}
-                    />
-                    <UserLinks
-                        location={user.location}
-                        email={user.email}
-                        github={user.html_url}
                     />
                 </S.Container>
             )}

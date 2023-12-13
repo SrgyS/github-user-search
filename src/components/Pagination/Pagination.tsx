@@ -10,7 +10,8 @@ type Props = {
 };
 
 const Pagination = ({ count, onPageChange, pageNumber }: Props) => {
-    const totalPages = Math.ceil(count / 30);
+    const totalPages =
+        Math.ceil(count / 30) > 100 ? 100 : Math.ceil(count / 30);
 
     const handleNextClick = () => {
         onPageChange(pageNumber + 1);
@@ -32,6 +33,7 @@ const Pagination = ({ count, onPageChange, pageNumber }: Props) => {
                 <S.Count>
                     {pageNumber}/{totalPages}
                 </S.Count>
+
                 <S.ArrowBtn
                     onClick={handleNextClick}
                     disabled={pageNumber === totalPages}

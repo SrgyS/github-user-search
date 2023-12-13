@@ -1,3 +1,4 @@
+import { IFormData, IUserData } from '../../types';
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 export const usersApi = createApi({
@@ -10,18 +11,18 @@ export const usersApi = createApi({
         },
     }),
     endpoints: (build) => ({
-        getUserList: build.query({
-            query: ({ userName, page, sort, order }) => {
-                if (!userName) {
+        getUserList: build.mutation<IUserData, IFormData>({
+            query: ({ userLogin, currentPage, sort, order }) => {
+                if (!userLogin) {
                     return {
                         url: `search/users`,
                     };
                 }
 
                 return {
-                    url: `search/users?q=${userName}`,
+                    url: `search/users?q=${userLogin}`,
                     params: {
-                        page,
+                        page: currentPage,
                         sort,
                         order,
                     },
@@ -34,4 +35,4 @@ export const usersApi = createApi({
     }),
 });
 
-export const { useGetUserListQuery, useGetUserQuery } = usersApi;
+export const { useGetUserListMutation, useGetUserQuery } = usersApi;
