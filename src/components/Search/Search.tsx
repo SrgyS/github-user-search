@@ -1,25 +1,32 @@
 import * as S from './Search.styles';
+import * as S2 from '../Header/Header.styles';
 
 import { darkTheme, lightTheme } from '../../Styles/Themes.styles';
+import {
+    resetStore,
+    setUserList,
+    updateSearchParams,
+} from '../../store/slices/usersSlice';
 import { useEffect, useState } from 'react';
 
 import { ErrorMessage } from '../Header/Header.styles';
 import { IFormData } from '../../types';
-import { useLocalStorage } from '../../hooks/useLocalStorage';
+import Loader from '../Loader/Loader';
+import { useAppDispatch } from '../../hooks/reduxHooks';
+import { useGetUserListMutation } from '../../store/services/usersApi';
+import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../hooks/useTheme';
-
-type SearchProps = {
-    onSubmit: (formData: IFormData) => void;
-    onClear: () => void;
-};
 
 type FormChangeHandler =
     | React.ChangeEvent<HTMLInputElement>
     | React.ChangeEvent<HTMLSelectElement>;
 
-const Search = ({ onSubmit, onClear }: SearchProps) => {
+const Search = () => {
     const { lightMode } = useTheme();
     const theme = lightMode ? lightTheme : darkTheme;
+    const navigate = useNavigate();
+    const dispatch = useAppDispatch();
+
     const initialFormData: IFormData = {
         userLogin: '',
         currentPage: 1,
@@ -27,29 +34,17 @@ const Search = ({ onSubmit, onClear }: SearchProps) => {
         order: '',
     };
 
-    const [formData, setFormData] = useLocalStorage<IFormData>(
-        'searchParams',
-        initialFormData
-    );
+    // const selectSubmit = () => {
+    //     const btnElement = document.getElementById(
+    //         'search-btn'
+    //     ) as HTMLButtonElement;
+
+    //     btnElement.click();
+    // };
+
+    const [formData, setFormData] = useState<IFormData>(initialFormData);
     const [errorMessage, setErrorMessage] = useState('');
-
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        if (/\s/.test(formData.userLogin)) {
-            setErrorMessage('Username cannot contain spaces');
-            return;
-        }
-
-        if (!/^[a-zA-Z0-9_-]+$/.test(formData.userLogin)) {
-            setErrorMessage(
-                'Please enter a username with Latin characters, numbers, underscores, or hyphens only'
-            );
-            return;
-        }
-
-        onSubmit(formData);
-        localStorage.setItem('searchParams', JSON.stringify(formData));
-    };
+    const [formError, setFormError] = useState('');
 
     const isButtonDisabled = formData.userLogin === '';
 
@@ -65,39 +60,71 @@ const Search = ({ onSubmit, onClear }: SearchProps) => {
             ...formData,
             [name]: sortValue,
             order: orderValue,
-        };
+        } as IFormData;
 
         setFormData(updatedFormData);
         console.log('set formData', updatedFormData);
 
         if (name === 'userLogin' && value === '') {
-            onClear();
+            dispatch(resetStore());
+
             setFormData(initialFormData);
+            navigate('/');
         }
     };
 
-    // const selectSubmit = () => {
-    //     const btnElement = document.getElementById(
-    //         'search-btn'
-    //     ) as HTMLButtonElement;
+    const [getUserList, { data, error, isLoading }] = useGetUserListMutation();
 
-    //     btnElement.click();
-    // };
-
-    useEffect(() => {
-        console.log('formData', formData);
-    }, [formData]);
-
-    useEffect(() => {
-        const storedParams = localStorage.getItem('searchParams');
-        if (storedParams) {
-            setFormData(JSON.parse(storedParams));
-            console.log('stored params', JSON.parse(storedParams));
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        if (/\s/.test(formData.userLogin)) {
+            setFormError('Username cannot contain spaces');
+            return;
         }
-    }, []);
+
+        if (!/^[a-zA-Z0-9_-]+$/.test(formData.userLogin)) {
+            setFormError(
+                'Please enter a username with Latin characters, numbers, underscores, or hyphens only'
+            );
+            return;
+        }
+
+        if (formData.userLogin !== '') {
+            getUserList({
+                userLogin: formData.userLogin,
+                currentPage: 1,
+                sort: formData?.sort,
+                order: formData?.order,
+            });
+
+            dispatch(updateSearchParams(formData));
+        }
+        setErrorMessage('');
+    };
+
+    useEffect(() => {
+        if (data) {
+            console.log('userDisp');
+            dispatch(setUserList(data));
+        }
+    }, [data]);
+
+    useEffect(() => {
+        if (error) {
+            if ('status' in error) {
+                error.status === 403
+                    ? setErrorMessage(
+                          'Sorry, over request limit. Please try again later.'
+                      )
+                    : setErrorMessage(
+                          'Sorry, we are unable to get the response from the server. Please try again later.'
+                      );
+            }
+        }
+    }, [error]);
 
     return (
-        <div>
+        <>
             <S.SearchForm id='search-form' onSubmit={handleSubmit}>
                 <S.SearchBar>
                     <S.SearchInput
@@ -107,7 +134,7 @@ const Search = ({ onSubmit, onClear }: SearchProps) => {
                         name='userLogin'
                         required
                         onChange={handleChange}
-                        value={formData.userLogin}
+                        value={formData?.userLogin}
                     />
                     <S.SearchButton
                         type='submit'
@@ -117,7 +144,7 @@ const Search = ({ onSubmit, onClear }: SearchProps) => {
                         Search
                     </S.SearchButton>
                 </S.SearchBar>
-                {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
+                {formError && <ErrorMessage>{formError}</ErrorMessage>}
                 <S.FilterBar>
                     <S.SelectItem>
                         <svg
@@ -138,9 +165,7 @@ const Search = ({ onSubmit, onClear }: SearchProps) => {
                             id='sort'
                             onChange={(e) => {
                                 handleChange(e);
-                                // selectSubmit();
                             }}
-                            value={formData.sort}
                         >
                             <option value=''>Sort by</option>
                             <option value='repositories'>
@@ -157,7 +182,12 @@ const Search = ({ onSubmit, onClear }: SearchProps) => {
                     </S.SelectItem>
                 </S.FilterBar>
             </S.SearchForm>
-        </div>
+            {isLoading && <Loader />}
+            {data && data.total_count === 0 && (
+                <S2.NotFoundMessage>No users found</S2.NotFoundMessage>
+            )}
+            {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
+        </>
     );
 };
 

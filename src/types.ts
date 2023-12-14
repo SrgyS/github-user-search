@@ -17,3 +17,8 @@ export interface IFormData {
     sort: string;
     order: string;
 }
+export interface IUserStore {
+    items: IUser[];
+    total_count: number;
+    searchParams: IFormData;
+}

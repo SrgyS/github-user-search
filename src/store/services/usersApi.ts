@@ -18,7 +18,6 @@ export const usersApi = createApi({
                         url: `search/users`,
                     };
                 }
-
                 return {
                     url: `search/users?q=${userLogin}`,
                     params: {

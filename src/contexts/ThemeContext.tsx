@@ -3,8 +3,6 @@ import { darkTheme, lightTheme } from '../Styles/Themes.styles';
 
 import { ThemeProvider } from 'styled-components';
 
-// type Theme = typeof lightTheme;
-
 interface ThemeContextProps {
     lightMode: boolean;
     toggleTheme: () => void;
