@@ -1,5 +1,4 @@
 import * as S from './Search.styles';
-import * as S2 from '../Header/Header.styles';
 
 import { darkTheme, lightTheme } from '../../Styles/Themes.styles';
 import {
@@ -9,9 +8,9 @@ import {
 } from '../../store/slices/usersSlice';
 import { useEffect, useState } from 'react';
 
-import { ErrorMessage } from '../Header/Header.styles';
+import { ErrorMessage } from '../Error/ErrorMessage.styles';
 import { IFormData } from '../../types';
-import Loader from '../Loader/Loader';
+import { NotFoundMessage } from '../Error/NotFoundMessage.styles';
 import { useAppDispatch } from '../../hooks/reduxHooks';
 import { useGetUserListMutation } from '../../store/services/usersApi';
 import { useNavigate } from 'react-router-dom';
@@ -31,16 +30,8 @@ const Search = () => {
         userLogin: '',
         currentPage: 1,
         sort: '',
-        order: '',
+        order: 'desc',
     };
-
-    // const selectSubmit = () => {
-    //     const btnElement = document.getElementById(
-    //         'search-btn'
-    //     ) as HTMLButtonElement;
-
-    //     btnElement.click();
-    // };
 
     const [formData, setFormData] = useState<IFormData>(initialFormData);
     const [errorMessage, setErrorMessage] = useState('');
@@ -52,31 +43,46 @@ const Search = () => {
         setErrorMessage('');
         const { name, value } = e.target;
 
-        const [sortValue, orderValue] = value.endsWith('-asc')
-            ? [value.replace('-asc', ''), 'asc']
-            : [value, 'desc'];
+        if (name === 'sort') {
+            const [sortValue, orderValue] = value.endsWith('-asc')
+                ? [value.replace('-asc', ''), 'asc']
+                : [value, 'desc'];
 
-        const updatedFormData = {
-            ...formData,
-            [name]: sortValue,
-            order: orderValue,
-        } as IFormData;
+            const updatedFormData = {
+                ...formData,
+                [name]: sortValue,
+                order: orderValue,
+            } as IFormData;
 
-        setFormData(updatedFormData);
-        console.log('set formData', updatedFormData);
+            setFormData(updatedFormData);
+        } else {
+            const updatedFormData = {
+                ...formData,
+                [name]: value,
+            } as IFormData;
+
+            setFormData(updatedFormData);
+        }
 
         if (name === 'userLogin' && value === '') {
             dispatch(resetStore());
-
             setFormData(initialFormData);
+            const sortSelect = document.getElementById(
+                'sort'
+            ) as HTMLSelectElement;
+            if (sortSelect) {
+                sortSelect.value = '';
+            }
+
             navigate('/');
         }
     };
 
-    const [getUserList, { data, error, isLoading }] = useGetUserListMutation();
+    const [getUserList, { data, error }] = useGetUserListMutation();
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
         if (/\s/.test(formData.userLogin)) {
             setFormError('Username cannot contain spaces');
             return;
@@ -104,10 +110,17 @@ const Search = () => {
 
     useEffect(() => {
         if (data) {
-            console.log('userDisp');
             dispatch(setUserList(data));
         }
     }, [data]);
+
+    const onSubmit = () => {
+        const searchBtnElement = document.getElementById(
+            'search-btn'
+        ) as HTMLButtonElement;
+
+        searchBtnElement?.click();
+    };
 
     useEffect(() => {
         if (error) {
@@ -122,6 +135,10 @@ const Search = () => {
             }
         }
     }, [error]);
+
+    useEffect(() => {
+        onSubmit();
+    }, [formData.sort, formData.order]);
 
     return (
         <>
@@ -163,6 +180,7 @@ const Search = () => {
                             disabled={isButtonDisabled}
                             name='sort'
                             id='sort'
+                            data-testid='sort'
                             onChange={(e) => {
                                 handleChange(e);
                             }}
@@ -182,9 +200,8 @@ const Search = () => {
                     </S.SelectItem>
                 </S.FilterBar>
             </S.SearchForm>
-            {isLoading && <Loader />}
             {data && data.total_count === 0 && (
-                <S2.NotFoundMessage>No users found</S2.NotFoundMessage>
+                <NotFoundMessage>No users found</NotFoundMessage>
             )}
             {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
         </>

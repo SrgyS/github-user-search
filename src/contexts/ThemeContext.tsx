@@ -22,7 +22,7 @@ export const ThemeContextProvider = ({
     };
 
     useEffect(() => {
-        localStorage.getItem('theme') === 'light' && setLightMode(true);
+        localStorage.getItem('theme') === 'light' && setLightMode(false);
     }, []);
 
     useEffect(() => {

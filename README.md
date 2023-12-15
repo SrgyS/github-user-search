@@ -1,30 +1,54 @@
-# React + TypeScript + Vite
+# GitHub User Search App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is a simple React application for searching GitHub users with additional features such as sorting by the number of repositories and followers. Upon clicking on a user's name, detailed information is displayed, including a link to the GitHub profile, the number of repositories, followers, following, location, and registration date.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Search for users by user login  
+Sort users by most/fewest repositories  
+Sort users by most/fewest followers  
+View additional info on clicking username:
 
-## Expanding the ESLint configuration
+-   GitHub profile link
+-   Number of public repos
+-   Number of followers
+-   Number following
+-   Location
+-   Registered date
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+Paginated results
 
-- Configure the top-level `parserOptions` property like this:
+## Deploy
 
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
-```
+https://githb-user-search.netlify.app/
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+## Getting Started
+
+To get started with the project, follow these steps:
+
+1. Clone the repository with the command: git clone https://github.com/SrgyS/github-user-search.git
+2. Install dependencies using the command: npm install
+3. Start the project with the command: npm run start
+
+## Usage
+
+Enter a user login in the search input  
+Hit search or press enter  
+Results will be displayed in paginated cards  
+Sort via the dropdown menu  
+Click on username to view additional user details
+
+## Tech stack
+
+-   React
+-   Typescript
+-   Redux
+-   RTK Query
+-   REST API
+-   React Router
+-   Styled Components for styling
+-   Vitest for testing
+
+## Developer
+
+Sergei Stepanov

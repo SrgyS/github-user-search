@@ -27,12 +27,3 @@ export const ThemeRow = styled.div`
     justify-content: space-between;
     line-height: 1;
 `;
-
-export const NotFoundMessage = styled.div`
-    padding: 1rem;
-`;
-
-export const ErrorMessage = styled.div`
-    padding: 1rem;
-    color: red;
-`;

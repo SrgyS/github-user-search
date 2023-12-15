@@ -1,13 +1,13 @@
 import * as S from './MainPage.styles';
 
 import { darkTheme, lightTheme } from '../../Styles/Themes.styles';
-import { useEffect, useState } from 'react';
 
 import { GlobalStyle } from '../../Styles/Global.styles';
 import Header from '../../components/Header/Header';
 import Pagination from '../../components/Pagination/Pagination';
 import { SkeletonTheme } from 'react-loading-skeleton';
 import { UserList } from '../../components/UserList/UserList';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../hooks/useTheme';
 
@@ -19,6 +19,7 @@ const MainPage = () => {
     useEffect(() => {
         navigate('/');
     }, []);
+
     return (
         <SkeletonTheme
             baseColor={theme.backgroundColor}

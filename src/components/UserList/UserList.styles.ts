@@ -68,3 +68,7 @@ export const UserAvatar = styled.div`
         height: 150px;
     }
 `;
+export const Empty = styled.div`
+    height: 100%;
+    background-color: ${(props) => props.theme.backgroundColor};
+`;

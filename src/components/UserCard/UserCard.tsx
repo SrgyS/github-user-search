@@ -1,26 +1,43 @@
 import * as S from './UserCard.styles';
 
+import { useEffect, useState } from 'react';
+
+import { ErrorMessage } from '../Error/ErrorMessage.styles';
 import SkeletonCard from '../SkeletonCard/SkeletonCard';
 import UserInfo from './UserInfo/UserInfo';
 import UserStats from './UserStats/UserStats';
-import { useEffect } from 'react';
 import { useGetUserQuery } from '../../store/services/usersApi';
 import { useParams } from 'react-router-dom';
 
 const UserCard = () => {
     const { userLogin } = useParams();
-    console.log('userLogin', userLogin);
-    const { data: user, isLoading } = useGetUserQuery({ userLogin });
+    const [errorMessage, setErrorMessage] = useState('');
+    const { data: user, isLoading, error } = useGetUserQuery({ userLogin });
+
+    const handleDocumentClick = () => {
+        setErrorMessage('');
+    };
 
     useEffect(() => {
-        if (user) {
-            console.log('userData', user);
+        if (error) {
+            setErrorMessage(
+                'Sorry, we are unable to get the response from the server. Please try again later.'
+            );
         }
-    }, [user]);
+    }, [error]);
+
+    useEffect(() => {
+        document.addEventListener('click', handleDocumentClick);
+
+        return () => {
+            document.removeEventListener('click', handleDocumentClick);
+        };
+    }, []);
 
     return (
         <>
             {isLoading && <SkeletonCard />}
+            {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
             {user && (
                 <S.Container>
                     <UserInfo

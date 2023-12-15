@@ -1,6 +1,5 @@
 import * as S from './Header.styles';
 
-import Loader from '../Loader/Loader';
 import { Outlet } from 'react-router-dom';
 import Search from '../Search/Search';
 import { Suspense } from 'react';
@@ -16,16 +15,16 @@ const Header = () => {
             <S.Header>
                 <S.ThemeRow>
                     <h1>GitHub Users Search</h1>
-                    <S.ThemeBtn onClick={toggleTheme}>
+                    <S.ThemeBtn onClick={toggleTheme} data-testid='theme-btn'>
                         <img
                             src={lightMode ? darkThemeBtn : lightThemeBtn}
-                            alt=''
+                            alt='theme toggle button'
                         />
                     </S.ThemeBtn>
                 </S.ThemeRow>
                 <Search />
             </S.Header>
-            <Suspense fallback={<Loader />}>
+            <Suspense>
                 <Outlet />
             </Suspense>
         </S.HeaderContainer>

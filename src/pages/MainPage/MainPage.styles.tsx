@@ -10,7 +10,3 @@ export const Container = styled.div`
     margin: 0 auto;
     background-color: #fff;
 `;
-export const Empty = styled.div`
-    height: 100%;
-    background-color: ${(props) => props.theme.backgroundColor};
-`;
